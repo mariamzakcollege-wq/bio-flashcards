@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards</title>
+  <style>
+    body {
+      width: 350px;
+      min-height: 400px;
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #ffffff;
+      color: #333;
+      box-sizing: border-box;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .btn {
+      width: 100%;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    .btn:hover { background-color: #1b5e20; }
+    .btn-secondary { background-color: #6c757d; }
+    .btn-secondary:hover { background-color: #5a6268; }
+    .btn-info { background-color: #0288d1; }
+    .btn-info:hover { background-color: #01579b; }
+    .btn-danger { background-color: #d32f2f; }
+    .btn-danger:hover { background-color: #9a0007; }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0 14px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    /* Home Screen Layout */
+    #home-screen {
+      text-align: center;
+      padding-top: 10px;
+    }
+    .home-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #2e7d32;
+    }
+    .home-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .toast-msg {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      display: none;
+    }
+
+    /* Add Screen Header */
+    .add-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .btn-small {
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* Card Flip */
+    .scene {
+      width: 100%;
+      height: 200px;
+      perspective: 600px;
+      margin: 15px 0;
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    .card.is-flipped { transform: rotateY(180deg); }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .card-front { background: #ffffff; color: #2e7d32; font-size: 20px; border: 2px solid #2e7d32; font-weight: bold; }
+    .card-back { background: #2e7d32; color: white; transform: rotateY(180deg); font-size: 15px; line-height: 1.4; }
+
+    .nav-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-btn { background: #e0e0e0; color: #333; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1: Home -->
+  <div id="home-screen" class="screen active">
+    <div id="toast" class="toast-msg">Your terms have been added!</div>
+    <div class="home-title">Study Hub</div>
+    <div class="home-btn-group">
+      <button class="btn" id="home-add-btn">Add</button>
+      <button class="btn btn-secondary" id="home-study-btn">Study</button>
+      <button class="btn btn-info" id="home-edit-sheet-btn">Edit Spreadsheet</button>
+      <button class="btn btn-danger" id="home-delete-btn">Delete Previous Terms</button>
+    </div>
+  </div>
+
+  <!-- Screen 2: Add Term -->
+  <div id="add-screen" class="screen">
+    <div class="add-header">
+      <h3 style="margin:0;">Add Term</h3>
+      <button class="btn-small" id="add-another-btn">+ Add Another Word</button>
+    </div>
+    
+    <label>Subject</label>
+    <input type="text" id="input-subject" placeholder="e.g. Biology">
+
+    <label>Term</label>
+    <input type="text" id="input-term" placeholder="e.g. Osmosis">
+
+    <label>Definition</label>
+    <input type="text" id="input-def" placeholder="e.g. Movement of water...">
+
+    <button class="btn" id="done-btn" style="margin-top: 10px;">Done</button>
+  </div>
+
+  <!-- Screen 3: Study Selection -->
+  <div id="study-screen" class="screen">
+    <h2 style="text-align: center; color: #2e7d32; margin-top: 0;">Flashcards</h2>
+    <label>Select Subject</label>
+    <select id="subject-dropdown">
+      <option value="">Loading subjects...</option>
+    </select>
+    <button class="btn" id="go-btn" style="margin-top: 10px;">Go</button>
+    <button class="btn btn-secondary" id="study-back-btn" style="margin-top: 10px;">Back to Home</button>
+  </div>
+
+  <!-- Screen 4: Flashcards View -->
+  <div id="flashcard-screen" class="screen">
+    <div class="nav-controls">
+      <button class="nav-btn" id="prev-btn">&larr; Prev</button>
+      <span id="card-counter">1 / 1</span>
+      <button class="nav-btn" id="next-btn">Next &rarr;</button>
+    </div>
+
+    <div class="scene">
+      <div class="card" id="flashcard">
+        <div class="card-face card-front" id="card-term">Term</div>
+        <div class="card-face card-back" id="card-def">Definition</div>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" id="deck-back-btn" style="margin-top: 10px;">Back to Subjects</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

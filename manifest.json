@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "AP Bio Flashcards",
+  "version": "1.0",
+  "description": "Build custom flashcard decks from AP Biology terms.",
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
